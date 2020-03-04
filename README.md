@@ -1,7 +1,7 @@
 筒香成績Bot
 ====
 
-MLBプレイヤーの筒香嘉智 選手の成績を取得し、毎日Twitterに投稿するGoogle Apps Scriptです。
+MLBプレイヤーの[筒香嘉智](https://www.mlb.com/player/yoshitomo-tsutsugo-660294)選手の成績を取得し、毎日Twitterに投稿するGoogle Apps Scriptです。
 
 ## Description
 
