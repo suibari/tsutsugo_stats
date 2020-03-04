@@ -11,8 +11,8 @@ MLBプレイヤーの筒香嘉智 選手の成績を取得し、毎日Twitterに
 * Google Spread Sheetへの記録
 * 記録したデータの集計(グラフ化)★未実装
 * Twitterへの成績Summaryの投稿
-* 成績推移グラフの投稿★未実装
-* 最近の筒香のTwitter動画の検索、引用RT
+* Twitterへの成績推移グラフの投稿★未実装
+* Twitterへの最近の筒香の動画の検索と引用RT投稿
 
 本アプリケーションは以下のAPIを利用します。
 * [MLB Data API](https://appac.github.io/mlb-data-api-docs/)
