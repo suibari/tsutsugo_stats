@@ -20,3 +20,6 @@ MLBプレイヤーの筒香嘉智 選手の成績を取得し、毎日Twitterに
 
 本アプリケーションでは以下のHelper Codeを流用させていただきました。
 * https://github.com/gsuitedevs/apps-script-oauth1/blob/master/samples/Twitter.gs
+
+## License
+MIT
