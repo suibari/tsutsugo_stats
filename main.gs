@@ -3,16 +3,18 @@ function tweetandrecord() {
   // MLB APIから筒香STATS取得
   var stat = getTsutsugoSTAT();
   
-  // SpreadSheetに追記
-  writeSheet(stat);
+  // SpreadSheetアクセス
+  //ctrlSpreadSheet.writeSTATS(stat);
+  var str_stats_tdy = ctrlSpreadSheet.getTextOfTodaySTATS();
   
   // search news
   //var url = getTsutsugoNewsURL();
   
   // ツイート文生成、statusオブジェクト作成
-  var status_text = "MLB筒香成績botが現在の筒香をお知らせします("+stat.end_date+")\n"+
+  var status_text = "MLB筒香成績botがお知らせします("+stat.end_date+")\n"+
+                    "今日は、" + str_stats_tdy + "\n"+
                     "\n"+
-                    stat.g+"試合"+stat.ab+"打数"+stat.h+"安打"+stat.hr+"本塁打\n"+
+                    "通算: "+stat.g+"試合"+stat.ab+"打数"+stat.h+"安打"+stat.hr+"本塁打\n"+
                     "AVG(打率): "+stat.avg+"\n"+
                     "OBP(出塁率): "+stat.obp+"\n"+
                     "OPS: "+stat.ops+"\n"+
@@ -59,10 +61,10 @@ function tweetandrecord() {
   };
 };
 
-// write spreadsheet
-function writeSheet(stat) {
-  var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var r_stat = {
+// access spreadsheet
+var ctrlSpreadSheet = { 
+  
+  r_stat : {
     end_date: '1',
     g       : '2',  // game (試合数)
     tpa     : '3',  // total plate appearance (打席数)
@@ -93,15 +95,44 @@ function writeSheet(stat) {
     ibb     : '27', // intentional bb(敬遠)
     roe     : '28', // reached on error(失策出塁)
     woba    : '29'  // wOBA<weighted on base average>
-  };
+  },
+  
+  writeSTATS : function (stat) {
     
-  var r_w = sht.getLastRow() + 1;
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   
-  Object.keys(r_stat).forEach(function(key) {
-    sht.getRange(r_w, r_stat[key]).setValue(stat[key]);
-  });
+    Object.keys(this.r_stat).forEach(function(key) {
+      sht.getRange(sht.getLastRow()+1, this.r_stat[key]).setValue(stat[key]);
+    });
   
-  return;
+    return;
+  },
+  
+  getTextOfTodaySTATS : function () {
+
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    var l_row = sht.getLastRow();
+    var g_tdy = sht.getRange(l_row,   this.r_stat.g).getValue();
+    var g_ytd = sht.getRange(l_row-1, this.r_stat.g).getValue();
+    
+    if (g_tdy > g_ytd) {
+      //出場した。今日の成績を取得
+      var stats_tdy = function(key) {
+        return sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+      };
+      
+      var result = stats_tdy('ab') + "打数" + stats_tdy('h') + "安打" + stats_tdy('rbi') + "打点";
+      if (stats_tdy('bb') > 0) result = result + stats_tdy('bb') + "四球";
+      if (stats_tdy('hr') > 0) result = result + stats_tdy('hr') + "本塁打";
+      result = result + "でした。"
+      return result;
+      
+    } else {
+      //出場してない
+      return "試合には出ませんでした。";
+    }
+  }
 };
 
 // MLB APIアクセス
