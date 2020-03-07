@@ -4,7 +4,7 @@ function tweetandrecord() {
   var stat = getTsutsugoSTAT();
   
   // SpreadSheetアクセス
-  //ctrlSpreadSheet.writeSTATS(stat);
+  ctrlSpreadSheet.writeSTATS(stat);
   var str_stats_tdy = ctrlSpreadSheet.getTextOfTodaySTATS();
   
   // search news
@@ -97,34 +97,36 @@ var ctrlSpreadSheet = {
     woba    : '29'  // wOBA<weighted on base average>
   },
   
-  writeSTATS : function (stat) {
-    
+  writeSTATS : function (stat) { 
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
+    var l_row = sht.getLastRow();
+    
     Object.keys(this.r_stat).forEach(function(key) {
-      sht.getRange(sht.getLastRow()+1, this.r_stat[key]).setValue(stat[key]);
+      sht.getRange(l_row+1, this.r_stat[key]).setValue(stat[key]);
     });
   
     return;
   },
   
-  getTextOfTodaySTATS : function () {
-
+  getTodaySTATS : function (key) {
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
     var l_row = sht.getLastRow();
+    
+    return sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+  },
+  
+  getTextOfTodaySTATS : function () {
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var l_row = sht.getLastRow();
+    
     var g_tdy = sht.getRange(l_row,   this.r_stat.g).getValue();
     var g_ytd = sht.getRange(l_row-1, this.r_stat.g).getValue();
     
     if (g_tdy > g_ytd) {
       //出場した。今日の成績を取得
-      var stats_tdy = function(key) {
-        return sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
-      };
-      
-      var result = stats_tdy('ab') + "打数" + stats_tdy('h') + "安打" + stats_tdy('rbi') + "打点";
-      if (stats_tdy('bb') > 0) result = result + stats_tdy('bb') + "四球";
-      if (stats_tdy('hr') > 0) result = result + stats_tdy('hr') + "本塁打";
+      var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打" + this.getTodaySTATS('rbi') + "打点";
+      if (this.getTodaySTATS('bb') > 0) result = result + this.getTodaySTATS('bb') + "四球";    // 四球が0なら非表示
+      if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr') + "本塁打";  // HRが0なら非表示
       result = result + "でした。"
       return result;
       
