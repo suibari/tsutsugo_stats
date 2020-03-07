@@ -6,7 +6,8 @@ MLBプレイヤーの[筒香嘉智](https://www.mlb.com/player/yoshitomo-tsutsug
 ## Description
 
 本アプリケーションは以下の機能を有します。
-* 筒香嘉智の現在の成績取得
+* MLB APIを通じた筒香嘉智の通算成績取得
+* APIからは得られない前日の試合成績取得
 * APIからは得られない特殊な指標(wOBA:weighted On Base Average)等の算出
 * Google Spread Sheetへの記録
 * 記録したデータの集計(グラフ化)★未実装
