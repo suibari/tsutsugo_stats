@@ -102,8 +102,10 @@ var ctrlSpreadSheet = {
     var l_row = sht.getLastRow();
     
     Object.keys(this.r_stat).forEach(function(key) {
-      sht.getRange(l_row+1, this.r_stat[key]).setValue(stat[key]);
-    });
+      var col = this[key];
+      var v   = stat[key];
+      sht.getRange(l_row+1, col).setValue(v);
+    }, this.r_stat);
   
     return;
   },
@@ -124,9 +126,10 @@ var ctrlSpreadSheet = {
     
     if (g_tdy > g_ytd) {
       //出場した。今日の成績を取得
-      var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打" + this.getTodaySTATS('rbi') + "打点";
-      if (this.getTodaySTATS('bb') > 0) result = result + this.getTodaySTATS('bb') + "四球";    // 四球が0なら非表示
-      if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr') + "本塁打";  // HRが0なら非表示
+      var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打";
+      if (this.getTodaySTATS('rbi')> 0) result = result + this.getTodaySTATS('rbi') + "打点";    // 打点が0なら非表示
+      if (this.getTodaySTATS('bb') > 0) result = result + this.getTodaySTATS('bb')  + "四球";    // 四球が0なら非表示
+      if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr')  + "本塁打";  // HRが0なら非表示
       result = result + "でした。"
       return result;
       
