@@ -127,6 +127,7 @@ var ctrlSpreadSheet = {
     if (g_tdy > g_ytd) {
       //出場した。今日の成績を取得
       var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打";
+      if (this.getTodaySTATS('so') > 0) result = result + this.getTodaySTATS('so')  + "三振";    // 三振が0なら非表示
       if (this.getTodaySTATS('rbi')> 0) result = result + this.getTodaySTATS('rbi') + "打点";    // 打点が0なら非表示
       if (this.getTodaySTATS('bb') > 0) result = result + this.getTodaySTATS('bb')  + "四球";    // 四球が0なら非表示
       if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr')  + "本塁打";  // HRが0なら非表示
