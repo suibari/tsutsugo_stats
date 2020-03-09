@@ -30,7 +30,8 @@ function tweetandrecord() {
     obj_status.attachment_url = url.slice(0,-8); // 末尾の"/video/1"を削除するとattachment_urlに設定できる
   }
   
-  Twitter.tweet(obj_status);
+  // ツイートする
+  //Twitter.tweet(obj_status);
   
   //----
   function getConditionByWOBA(woba) {
@@ -65,48 +66,52 @@ function tweetandrecord() {
 var ctrlSpreadSheet = { 
   
   r_stat : {
-    end_date: '1',
-    g       : '2',  // game (試合数)
-    tpa     : '3',  // total plate appearance (打席数)
-    ab      : '4',  // at bat (打数)
-    r       : '5',  // run (得点)
-    h       : '6',  // hit (安打)
-    d       : '7',  // double
-    t       : '8',  // triple
-    hr      : '9',  // homerun
-    tb      : '10', // 塁打数
+    end_date: '2',
+    g       : '3',  // game (試合数)
+    tpa     : '4',  // total plate appearance (打席数)
+    ab      : '5',  // at bat (打数)
+    r       : '6',  // run (得点)
+    h       : '7',  // hit (安打)
+    d       : '8',  // double
+    t       : '9',  // triple
+    hr      : '10', // homerun
+    tb      : '11', // 塁打数
     //xbh     : '10', // extra base hit (塁打数)
-    rbi     : '11', // runs batted in (打点)
-    sb      : '12', // steelng base
+    rbi     : '12', // runs batted in (打点)
+    sb      : '13', // steelng base
                     // caught steeling
                     // sacrifice hit (犠打)
-    sf      : '15', // sacrifice fly (犠飛)
-    bb      : '16', // base on ball (四球)
-    hbp     : '17', // hit by pitch (死球)
-    so      : '18', // strikeout
-    gidp    : '19', // ground into double play (併殺打)
-    avg     : '20',
-    obp     : '21',
-    slg     : '22',
-    ops     : '23',
-    babip   : '24',
-    ppa     : '25', // 被投球数
-    go_ao   : '26', // ground outs/air outs(ゴロアウト比率:平均1.08)
-    ibb     : '27', // intentional bb(敬遠)
-    roe     : '28', // reached on error(失策出塁)
-    woba    : '29'  // wOBA<weighted on base average>
+    sf      : '16', // sacrifice fly (犠飛)
+    bb      : '17', // base on ball (四球)
+    hbp     : '18', // hit by pitch (死球)
+    so      : '19', // strikeout
+    gidp    : '20', // ground into double play (併殺打)
+    avg     : '21',
+    obp     : '22',
+    slg     : '23',
+    ops     : '24',
+    babip   : '25',
+    ppa     : '26', // 被投球数
+    go_ao   : '27', // ground outs/air outs(ゴロアウト比率:平均1.08)
+    ibb     : '28', // intentional bb(敬遠)
+    roe     : '29', // reached on error(失策出塁)
+    woba    : '30'  // wOBA<weighted on base average>
   },
   
   writeSTATS : function (stat) { 
-    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var sht   = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var l_row = sht.getLastRow();
     
-    Object.keys(this.r_stat).forEach(function(key) {
-      var col = this[key];
+    // スクリプト動作日付を記入
+    var date  = new Date();
+    sht.getRange(l_row+1, 1).setValue(date);
+    
+    // API取得データを記入
+    for (var key in this.r_stat) {
+      var col = this.r_stat[key];
       var v   = stat[key];
       sht.getRange(l_row+1, col).setValue(v);
-    }, this.r_stat);
-  
+    }
     return;
   },
   
