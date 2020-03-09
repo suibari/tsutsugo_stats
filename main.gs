@@ -5,6 +5,7 @@ function tweetandrecord() {
   
   // SpreadSheetアクセス
   ctrlSpreadSheet.writeSTATS(stat);
+  saveChartToGoogleDrive();
   var str_stats_tdy = ctrlSpreadSheet.getTextOfTodaySTATS();
   
   // search news
@@ -29,6 +30,9 @@ function tweetandrecord() {
   if (url) {
     obj_status.attachment_url = url.slice(0,-8); // 末尾の"/video/1"を削除するとattachment_urlに設定できる
   }
+  
+  // グラフをstatusオブジェクトに追加
+  obj_status.media_ids = getMediaStringIdOfChart();
   
   // ツイートする
   Twitter.tweet(obj_status);
