@@ -31,7 +31,7 @@ function tweetandrecord() {
   }
   
   // ツイートする
-  //Twitter.tweet(obj_status);
+  Twitter.tweet(obj_status);
   
   //----
   function getConditionByWOBA(woba) {
