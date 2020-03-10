@@ -3,16 +3,19 @@ function tweetandrecord() {
   // MLB APIから筒香STATS取得
   var stat = getTsutsugoSTAT();
   
-  // SpreadSheetに追記
-  writeSheet(stat);
+  // SpreadSheetアクセス
+  ctrlSpreadSheet.writeSTATS(stat);
+  saveChartToGoogleDrive();
+  var str_stats_tdy = ctrlSpreadSheet.getTextOfTodaySTATS();
   
   // search news
   //var url = getTsutsugoNewsURL();
   
   // ツイート文生成、statusオブジェクト作成
-  var status_text = "MLB筒香成績botが現在の筒香をお知らせします("+stat.end_date+")\n"+
+  var status_text = "MLB筒香成績botがお知らせします("+stat.end_date+")\n"+
+                    "今日は、" + str_stats_tdy + "\n"+
                     "\n"+
-                    stat.g+"試合"+stat.ab+"打数"+stat.h+"安打"+stat.hr+"本塁打\n"+
+                    "通算: "+stat.g+"試合"+stat.ab+"打数"+stat.h+"安打"+stat.hr+"本塁打\n"+
                     "AVG(打率): "+stat.avg+"\n"+
                     "OBP(出塁率): "+stat.obp+"\n"+
                     "OPS: "+stat.ops+"\n"+
@@ -28,6 +31,10 @@ function tweetandrecord() {
     obj_status.attachment_url = url.slice(0,-8); // 末尾の"/video/1"を削除するとattachment_urlに設定できる
   }
   
+  // グラフをstatusオブジェクトに追加
+  obj_status.media_ids = getMediaStringIdOfChart();
+  
+  // ツイートする
   Twitter.tweet(obj_status);
   
   //----
@@ -59,49 +66,88 @@ function tweetandrecord() {
   };
 };
 
-// write spreadsheet
-function writeSheet(stat) {
-  var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var r_stat = {
-    end_date: '1',
-    g       : '2',  // game (試合数)
-    tpa     : '3',  // total plate appearance (打席数)
-    ab      : '4',  // at bat (打数)
-    r       : '5',  // run (得点)
-    h       : '6',  // hit (安打)
-    d       : '7',  // double
-    t       : '8',  // triple
-    hr      : '9',  // homerun
-    tb      : '10', // 塁打数
+// access spreadsheet
+var ctrlSpreadSheet = { 
+  
+  r_stat : {
+    end_date: '2',
+    g       : '3',  // game (試合数)
+    tpa     : '4',  // total plate appearance (打席数)
+    ab      : '5',  // at bat (打数)
+    r       : '6',  // run (得点)
+    h       : '7',  // hit (安打)
+    d       : '8',  // double
+    t       : '9',  // triple
+    hr      : '10', // homerun
+    tb      : '11', // 塁打数
     //xbh     : '10', // extra base hit (塁打数)
-    rbi     : '11', // runs batted in (打点)
-    sb      : '12', // steelng base
+    rbi     : '12', // runs batted in (打点)
+    sb      : '13', // steelng base
                     // caught steeling
                     // sacrifice hit (犠打)
-    sf      : '15', // sacrifice fly (犠飛)
-    bb      : '16', // base on ball (四球)
-    hbp     : '17', // hit by pitch (死球)
-    so      : '18', // strikeout
-    gidp    : '19', // ground into double play (併殺打)
-    avg     : '20',
-    obp     : '21',
-    slg     : '22',
-    ops     : '23',
-    babip   : '24',
-    ppa     : '25', // 被投球数
-    go_ao   : '26', // ground outs/air outs(ゴロアウト比率:平均1.08)
-    ibb     : '27', // intentional bb(敬遠)
-    roe     : '28', // reached on error(失策出塁)
-    woba    : '29'  // wOBA<weighted on base average>
-  };
+    sf      : '16', // sacrifice fly (犠飛)
+    bb      : '17', // base on ball (四球)
+    hbp     : '18', // hit by pitch (死球)
+    so      : '19', // strikeout
+    gidp    : '20', // ground into double play (併殺打)
+    avg     : '21',
+    obp     : '22',
+    slg     : '23',
+    ops     : '24',
+    babip   : '25',
+    ppa     : '26', // 被投球数
+    go_ao   : '27', // ground outs/air outs(ゴロアウト比率:平均1.08)
+    ibb     : '28', // intentional bb(敬遠)
+    roe     : '29', // reached on error(失策出塁)
+    woba    : '30'  // wOBA<weighted on base average>
+  },
+  
+  writeSTATS : function (stat) { 
+    var sht   = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var l_row = sht.getLastRow();
     
-  var r_w = sht.getLastRow() + 1;
+    // スクリプト動作日付を記入
+    var date  = new Date();
+    sht.getRange(l_row+1, 1).setValue(date);
+    
+    // API取得データを記入
+    for (var key in this.r_stat) {
+      var col = this.r_stat[key];
+      var v   = stat[key];
+      sht.getRange(l_row+1, col).setValue(v);
+    }
+    return;
+  },
   
-  Object.keys(r_stat).forEach(function(key) {
-    sht.getRange(r_w, r_stat[key]).setValue(stat[key]);
-  });
+  getTodaySTATS : function (key) {
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var l_row = sht.getLastRow();
+    
+    return sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+  },
   
-  return;
+  getTextOfTodaySTATS : function () {
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var l_row = sht.getLastRow();
+    
+    var g_tdy = sht.getRange(l_row,   this.r_stat.g).getValue();
+    var g_ytd = sht.getRange(l_row-1, this.r_stat.g).getValue();
+    
+    if (g_tdy > g_ytd) {
+      //出場した。今日の成績を取得
+      var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打";
+      if (this.getTodaySTATS('so') > 0) result = result + this.getTodaySTATS('so')  + "三振";    // 三振が0なら非表示
+      if (this.getTodaySTATS('rbi')> 0) result = result + this.getTodaySTATS('rbi') + "打点";    // 打点が0なら非表示
+      if (this.getTodaySTATS('bb') > 0) result = result + this.getTodaySTATS('bb')  + "四球";    // 四球が0なら非表示
+      if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr')  + "本塁打";  // HRが0なら非表示
+      result = result + "でした。"
+      return result;
+      
+    } else {
+      //出場してない
+      return "試合には出ませんでした。";
+    }
+  }
 };
 
 // MLB APIアクセス
