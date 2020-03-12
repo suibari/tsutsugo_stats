@@ -176,7 +176,7 @@ function getTsutsugoSTAT() {
   stat.pak = Math.round(pak*100)/100;
   
   // calculate BB/K
-  var bbk = stat.bb / stat.k;
+  var bbk = stat.bb / stat.so;
   stat.bbk = Math.round(bbk*1000)/1000;
   
   //writeSheet(stat);
