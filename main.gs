@@ -22,7 +22,9 @@ function tweetandrecord() {
                     "wOBA: "+stat.woba+" "+getConditionByWOBA(stat.woba)+"\n"+
                     "\n"+
                     "Go, go, Tsutsugo!!\n"+
-                    "#baystars #筒香嘉智 #RaysUp";
+                    "#baystars #筒香嘉智 #RaysUp\n"+
+                    "\n"+
+                    "GitHub: "+"https://github.com/suibari/tsutsugo_stats";
   var obj_status = {status: status_text};
 
   // 筒香video検索、あったらstatusオブジェクトに追加
@@ -99,7 +101,9 @@ var ctrlSpreadSheet = {
     go_ao   : '27', // ground outs/air outs(ゴロアウト比率:平均1.08)
     ibb     : '28', // intentional bb(敬遠)
     roe     : '29', // reached on error(失策出塁)
-    woba    : '30'  // wOBA<weighted on base average>
+    woba    : '30', // wOBA<weighted on base average>
+    pak     : '31', // Plate Appearance/K (1三振あたりの打席数)
+    bbk     : '32'  // Base on Ball /K (選球眼)
   },
   
   writeSTATS : function (stat) { 
@@ -166,6 +170,14 @@ function getTsutsugoSTAT() {
   var woba = (0.72*(stat.bb-stat.ibb) + 0.75*stat.hbp + 0.90*(stat.tb-2*stat.d-3*stat.t-4*stat.hr) +
               0.92*stat.roe + 1.24*stat.d + 1.56*stat.t + 1.95*stat.hr)/stat.tpa;
   stat.woba = Math.round(woba*1000)/1000;  // 0.xxx 形式に丸める
+  
+  // calculate PA/K
+  var pak = stat.tpa / stat.so;
+  stat.pak = Math.round(pak*100)/100;
+  
+  // calculate BB/K
+  var bbk = stat.bb / stat.k;
+  stat.bbk = Math.round(bbk*1000)/1000;
   
   //writeSheet(stat);
   Logger.log(stat);
