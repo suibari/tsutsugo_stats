@@ -157,7 +157,7 @@ var ctrlSpreadSheet = {
 // MLB APIアクセス
 function getTsutsugoSTAT() {
   var BASE_URL  = 'http://lookup-service-prod.mlb.com/';
-  var GAME_TYPE = 'S';
+  var GAME_TYPE = 'R';
   var SEASON    = '2020';
   var PLAYER_ID = '660294';   //tsutsugo's ID
   
