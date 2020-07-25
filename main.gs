@@ -127,7 +127,14 @@ var ctrlSpreadSheet = {
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var l_row = sht.getLastRow();
     
-    return sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+    if (l_row == 2) {
+      // シーズン1試合目の場合、前日との差でその日の打数を表せない
+      var stat_tdy = sht.getRange(l_row, this.r_stat[key]).getValue();
+    } else {  
+      var stat_tdy = sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+    }
+    
+    return stat_tdy;
   },
   
   getTextOfTodaySTATS : function () {
@@ -137,7 +144,7 @@ var ctrlSpreadSheet = {
     var g_tdy = sht.getRange(l_row,   this.r_stat.g).getValue();
     var g_ytd = sht.getRange(l_row-1, this.r_stat.g).getValue();
     
-    if (g_tdy > g_ytd) {
+    if ((g_tdy > g_ytd) || (g_tdy == 1)) {
       //出場した。今日の成績を取得
       var result = this.getTodaySTATS('ab') + "打数" + this.getTodaySTATS('h') + "安打";
       if (this.getTodaySTATS('so') > 0) result = result + this.getTodaySTATS('so')  + "三振";    // 三振が0なら非表示
