@@ -262,10 +262,10 @@ function getTsutsugoNewsURL() {
 
 function searchTsutsugoMovie() {
   
-  var PASTDAY = 3; //何日前のtweetから検索対象にするか
+  var PASTDAY = 1; //何日前のtweetから検索対象にするか
   
-  var req = {q: "tsutsugo filter:videos since:"+getPastDate(PASTDAY),
-             result_type: 'popular'};
+  var req = {q: "(tsutsugo OR 筒香) -RT filter:videos since:"+getPastDate(PASTDAY), //x日前から今までの、tsutsugoまたは筒香が含まれる動画付きツイート(RTではない)
+             result_type: 'mixed'};
   var status = Twitter.search(req).statuses[0];
   if (status) {
     var result = status.extended_entities.media[0].expanded_url;
