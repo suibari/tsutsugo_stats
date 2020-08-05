@@ -1,7 +1,21 @@
+function checkUpdateSTATS() {
+  // MLB APIから筒香STATS取得
+  var stat = getSTATfromMLBAPI('660294');
+  
+  var g_ytd = ctrlSpreadSheet.getSTATSfromSS(0, "g");
+  // 試合数が増加している場合のみ実行
+  if (stat.g > g_ytd) {
+    tweetandrecord();
+  } else {
+    // 試合数未増加時はとりあえずログに書き込んでおく
+    console.log(stat);
+  }
+}
+
 // JSONperse & tweet
 function tweetandrecord() {
   // MLB APIから筒香STATS取得
-  var stat = getTsutsugoSTAT();
+  var stat = getSTATfromMLBAPI('660294');
   
   // SpreadSheetアクセス
   ctrlSpreadSheet.writeSTATS(stat);
@@ -16,21 +30,22 @@ function tweetandrecord() {
                     "今日は、" + str_stats_tdy + "\n"+
                     "\n"+
                     "通算: "+stat.g+"試合"+stat.ab+"打数"+stat.h+"安打"+stat.hr+"本塁打\n"+
-                    "AVG(打率): "+stat.avg+"\n"+
-                    "OBP(出塁率): "+stat.obp+"\n"+
+                    "AVG: "+stat.avg+"\n"+
+                    "OBP: "+stat.obp+"\n"+
                     "OPS: "+stat.ops+"\n"+
                     "wOBA: "+stat.woba+" "+getConditionByWOBA(stat.woba)+"\n"+
                     "\n"+
                     "Go, go, Tsutsugo!!\n"+
                     "#baystars #筒香嘉智 #RaysUp\n"+
                     "\n"+
-                    "GitHub: "+"https://github.com/suibari/tsutsugo_stats";
+                    "GitHub: "+"https://github.com/suibari/tsutsugo_stats\n";
   var obj_status = {status: status_text};
 
   // 筒香video検索、あったらstatusオブジェクトに追加
   var url = searchTsutsugoMovie();
   if (url) {
-    obj_status.attachment_url = url.slice(0,-8); // 末尾の"/video/1"を削除するとattachment_urlに設定できる
+    //obj_status.attachment_url = url.slice(0,-8); // 末尾の"/video/1"を削除するとattachment_urlに設定できる
+    obj_status.status = obj_status.status + url; // attachment_urlとmedia_idsは共存できないので、URLを直に貼り付けて引用RTする
   }
   
   // グラフをstatusオブジェクトに追加
@@ -123,20 +138,30 @@ var ctrlSpreadSheet = {
     return;
   },
   
+  // スプレッドシートから成績を取得する関数
+  getSTATSfromSS : function (low, key) {
+    var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var l_row = sht.getLastRow();
+    
+    return sht.getRange((l_row-low), this.r_stat[key]).getValue();
+  },
+  
+  // 前日の成績と今日の成績を比較する関数
   getTodaySTATS : function (key) {
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var l_row = sht.getLastRow();
     
     if (l_row == 2) {
       // シーズン1試合目の場合、前日との差でその日の打数を表せない
-      var stat_tdy = sht.getRange(l_row, this.r_stat[key]).getValue();
+      var stat_tdy = this.getSTATSfromSS(0, key);
     } else {  
-      var stat_tdy = sht.getRange(l_row, this.r_stat[key]).getValue() - sht.getRange(l_row-1, this.r_stat[key]).getValue();
+      var stat_tdy = this.getSTATSfromSS(0, key) - this.getSTATSfromSS(1, key);
     }
     
     return stat_tdy;
   },
   
+  // 成績に関するテキストを得る関数
   getTextOfTodaySTATS : function () {
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var l_row = sht.getLastRow();
@@ -162,13 +187,13 @@ var ctrlSpreadSheet = {
 };
 
 // MLB APIアクセス
-function getTsutsugoSTAT() {
+function getSTATfromMLBAPI(pid) {
   var BASE_URL  = 'http://lookup-service-prod.mlb.com/';
   var GAME_TYPE = 'R';
   var SEASON    = '2020';
-  var PLAYER_ID = '660294';   //tsutsugo's ID
+  //var PLAYER_ID = '660294';   //tsutsugo's ID
   
-  var API_URL = "json/named.sport_hitting_tm.bam?league_list_id='mlb'&game_type='"+GAME_TYPE+"'&season='"+SEASON+"'&player_id='"+PLAYER_ID+"'";
+  var API_URL = "json/named.sport_hitting_tm.bam?league_list_id='mlb'&game_type='"+GAME_TYPE+"'&season='"+SEASON+"'&player_id='"+pid+"'";
   var result  = requestAPI(BASE_URL+API_URL, 'get');
   var stat    = result.body.sport_hitting_tm.queryResults.row;
   stat.end_date = stat.end_date.toString().substr(0,10);   //end_dateはyyyy-mm-dd形式にする
@@ -267,8 +292,9 @@ function searchTsutsugoMovie() {
   var req = {q: "(tsutsugo OR 筒香) -RT filter:videos since:"+getPastDate(PASTDAY), //x日前から今までの、tsutsugoまたは筒香が含まれる動画付きツイート(RTではない)
              result_type: 'mixed'};
   var status = Twitter.search(req).statuses[0];
-  if (status) {
-    var result = status.extended_entities.media[0].expanded_url;
+  if (status) { // 1件以上検索ヒットした場合実行
+    //var result = status.extended_entities.media[0].expanded_url;
+    var result = "https://twitter.com/" + status.user.screen_name + "/status/" + status.id_str; // 動画付きツイートのパーマリンクを得る
   }
   Logger.log(result);
   
