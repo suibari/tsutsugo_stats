@@ -172,7 +172,7 @@ var Twitter = {
       message = error;
     }
     
-    Logger.log(message);
+    console.error(message);
   },
   
   isEmpty: function(obj) {

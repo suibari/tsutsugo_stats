@@ -35,7 +35,6 @@ function tweetandrecord() {
                     "OPS: "+stat.ops+"\n"+
                     "wOBA: "+stat.woba+" "+getConditionByWOBA(stat.woba)+"\n"+
                     "\n"+
-                    "Go, go, Tsutsugo!!\n"+
                     "#baystars #筒香嘉智 #RaysUp\n"+
                     "\n"+
                     "GitHub: "+"https://github.com/suibari/tsutsugo_stats\n";
@@ -291,8 +290,8 @@ function searchTsutsugoMovie() {
   
   var req = {q: "(tsutsugo OR 筒香) -RT filter:videos since:"+getPastDate(PASTDAY), //x日前から今までの、tsutsugoまたは筒香が含まれる動画付きツイート(RTではない)
              result_type: 'mixed'};
-  var status = Twitter.search(req).statuses[0];
-  if (status) { // 1件以上検索ヒットした場合実行
+  if (Twitter.search(req).hasOwnProperty('statuses')) { // 1件以上検索ヒットした場合実行
+    var status = Twitter.search(req).statuses[0];
     //var result = status.extended_entities.media[0].expanded_url;
     var result = "https://twitter.com/" + status.user.screen_name + "/status/" + status.id_str; // 動画付きツイートのパーマリンクを得る
   }
