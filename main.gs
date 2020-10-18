@@ -149,8 +149,9 @@ var ctrlSpreadSheet = {
   getTodaySTATS : function (key) {
     var sht = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var l_row = sht.getLastRow();
+    var g_tdy = sht.getRange(l_row, this.r_stat.g).getValue();
     
-    if (l_row == 2) {
+    if (g_tdy == 1) {
       // シーズン1試合目の場合、前日との差でその日の打数を表せない
       var stat_tdy = this.getSTATSfromSS(0, key);
     } else {  
@@ -177,7 +178,6 @@ var ctrlSpreadSheet = {
       if (this.getTodaySTATS('hr') > 0) result = result + this.getTodaySTATS('hr')  + "本塁打";  // HRが0なら非表示
       result = result + "でした。"
       return result;
-      
     } else {
       //出場してない
       return "試合には出ませんでした。";
@@ -188,7 +188,12 @@ var ctrlSpreadSheet = {
 // MLB APIアクセス
 function getSTATfromMLBAPI(pid) {
   var BASE_URL  = 'http://lookup-service-prod.mlb.com/';
-  var GAME_TYPE = 'R';
+  var GAME_TYPE = 'R'; //'R' - Regular Season
+                       //'S' - Spring Training
+                       //'F' - Wild Card
+                       //'D' - Division Series
+                       //'L' - League Championship
+                       //'W' - World Series
   var SEASON    = '2020';
   //var PLAYER_ID = '660294';   //tsutsugo's ID
   
